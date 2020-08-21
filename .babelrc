@@ -1,0 +1,5 @@
+// condigurando para que o styled componenets funcione com serverside-rendering
+{
+  "presets": ["next/babel"],
+  "plugins": [["styled-components", { "ssr": true }]]
+}
