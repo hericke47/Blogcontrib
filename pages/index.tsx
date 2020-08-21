@@ -1,16 +1,75 @@
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import {Container, TitleContainer} from '../styles/Home'
+import Link from 'next/link'
 
-export default function Home() {
+import { fetchAPI } from '../lib/api-prismic';
+
+interface Post {
+  node: {
+    _meta: {
+      uid: string;
+    }
+    title: string;
+    thumbnail: {
+      url: string;
+    };
+    content: string;
+  }
+}
+
+interface HomeProps {
+  posts: Post[];
+}
+
+export default function Home({ posts }: HomeProps) {
   return (
-    <div className={styles.container}>
-      <ul>
-        {[...Array(10).keys()].map(item => (
-          <li key={`item-${item}`}>
-            {`Item ${item}`}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Container>
+      <Head>
+        <title>Rocketseat | Blog Next.JS</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <TitleContainer>
+        
+      </TitleContainer>
+
+     <ul>
+       {posts?.map(({ node }) => (
+         <li key={`post-${node._meta.uid}`}>
+            <Link href={`posts/${node._meta.uid}`}>
+              <a>
+                <img width="100" src={node.thumbnail.url} />
+                {node.title}
+              </a>
+            </Link>
+         </li>
+       ))}
+     </ul>
+    </Container>
   )
+}
+
+export async function getServerSideProps() {
+  const posts = await fetchAPI(`
+    query {
+      allPosts {
+        edges {
+          node{
+            _meta {
+              uid
+            }
+            title
+            thumbnail
+            content
+          }
+        }
+      }
+    }
+  `, {});
+
+  return {
+    props: {
+      posts: posts.allPosts.edges,
+    }
+  }
 }
